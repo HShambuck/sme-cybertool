@@ -43,7 +43,7 @@ const InputField = ({
     {showPasswordToggle && (
       <button
         type="button"
-        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+        className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer ease-in"
         onClick={onTogglePassword}
       >
         {type === "password" ? (
@@ -249,7 +249,7 @@ const Signup = () => {
               onChange={(e) =>
                 updateSignupForm("agreeToTerms", e.target.checked)
               }
-              className="w-4 h-4 mt-1"
+              className="w-4 h-4 mt-1 cursor-pointer ease-in"
             />
             <span className="text-sm text-gray-700">
               I agree to the Terms of Service and Privacy Policy
@@ -274,7 +274,7 @@ const Signup = () => {
           <button
             onClick={handleSignup}
             disabled={loading}
-            className="w-full flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ease-in"
           >
             {loading ? (
               <>

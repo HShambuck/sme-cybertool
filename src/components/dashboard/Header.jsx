@@ -16,7 +16,7 @@ const Header = ({ setSidebarOpen, userDropdown, setUserDropdown }) => {
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center">
           <button
-            className="lg:hidden mr-4"
+            className="lg:hidden mr-4 cursor-pointer ease-in"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu className="h-6 w-6 text-gray-500" />
@@ -25,7 +25,7 @@ const Header = ({ setSidebarOpen, userDropdown, setUserDropdown }) => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+          <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer ease-in">
             <Bell className="h-5 w-5" />
           </button>
 
@@ -34,13 +34,12 @@ const Header = ({ setSidebarOpen, userDropdown, setUserDropdown }) => {
               className="flex items-center space-x-2"
               onClick={() => setUserDropdown(!userDropdown)}
             >
-              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer ease-in">
                 <User className="h-4 w-4 text-gray-600" />
               </div>
-              <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center cursor-pointer ease-in">
                 <User className="h-4 w-4 text-white" />
               </div>
-              <ChevronDown className="h-4 w-4 text-gray-500" />
             </button>
 
             {userDropdown && (

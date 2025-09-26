@@ -30,7 +30,10 @@ const Sidebar = ({
             SME Security
           </span>
         </div>
-        <button className="lg:hidden" onClick={() => setSidebarOpen(false)}>
+        <button
+          className="lg:hidden cursor-pointer ease-in"
+          onClick={() => setSidebarOpen(false)}
+        >
           <X className="h-6 w-6 text-gray-500" />
         </button>
       </div>
@@ -43,7 +46,7 @@ const Sidebar = ({
               setCurrentView(item.id);
               setSidebarOpen(false);
             }}
-            className={`w-full flex items-center px-6 py-3 text-left hover:bg-blue-50 transition-colors ${
+            className={`w-full flex items-center px-6 py-3 text-left hover:bg-blue-50 transition-colors cursor-pointer ease-in ${
               currentView === item.id
                 ? "bg-blue-50 border-r-2 border-blue-500 text-blue-600"
                 : "text-gray-700"

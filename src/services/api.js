@@ -2,7 +2,10 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api", // backend base URL
+  baseURL: "http://localhost:5000/api",
+  headers: {
+    "Cache-Control": "no-cache"
+  }
 });
 
 // Automatically attach token if available
