@@ -5,7 +5,7 @@ import ThreatUpdatesCard from "./overview/ThreatUpdatesCard";
 import TrainingProgressCard from "./overview/TrainingProgressCard";
 import ActionButtons from "./overview/ActionButtons";
 
-const DashboardContent = ({
+const OverviewContent = ({
   riskData,
   recommendations,
   recentAlerts,
@@ -20,10 +20,11 @@ const DashboardContent = ({
         riskData={
           riskData || { score: null, level: "N/A", lastAssessment: null }
         }
+        setCurrentView={setCurrentView}
       />
 
       {/* Recommendations */}
-      <RecommendationsCard recommendations={recommendations || []} />
+      <RecommendationsCard recommendations={recommendations || []} setCurrentView={setCurrentView} />
 
       {/* Grid Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -42,4 +43,4 @@ const DashboardContent = ({
   );
 };
 
-export default DashboardContent;
+export default OverviewContent;

@@ -10,6 +10,10 @@ import {
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import Dashboard from "../pages/dashboard";
+import AssessmentContent from "../components/dashboard/AssessmentContent";
+import AssessmentResults from "../pages/AssessmentResults";
+import TrainingModules from "../pages/TrainingModules";
+import TrainingModuleDetail from "../pages/TrainingModuleDetail";
 
 // Protected Route helper
 const ProtectedRoute = ({ children }) => {
@@ -18,7 +22,6 @@ const ProtectedRoute = ({ children }) => {
   return token ? children : <Navigate to="/login" />;
 };
 
-
 const AppRouter = () => {
   return (
     <Router>
@@ -26,6 +29,8 @@ const AppRouter = () => {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+
+        {/* Protected Routes */}
         <Route
           path="/dashboard"
           element={
@@ -34,6 +39,24 @@ const AppRouter = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/assessment-results" element={<AssessmentResults />} />
+        <Route
+          path="/training"
+          element={
+            <ProtectedRoute>
+              <TrainingModules />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/training/:id"
+          element={
+            <ProtectedRoute>
+              <TrainingModuleDetail />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
