@@ -4,7 +4,8 @@ import {
   BarChart3,
   BookOpen,
   Bell,
-  Settings,
+  History,
+  Globe,
   X,
   ChevronLeft,
   Menu,
@@ -44,11 +45,17 @@ const Sidebar = ({
       action: () => setCurrentView("threats"),
     },
     {
-      id: "settings",
-      label: "Settings",
-      icon: Settings,
-      action: () => setCurrentView("settings"),
+      id: "security",
+      label: "Web Security Analysis",
+      icon: Globe,
+      action: () => setCurrentView("security"),
     },
+    // {
+    //   id: "history",
+    //   label: "Scan History",
+    //   icon: History,
+    //   action: () => setCurrentView("history"),
+    // },
   ];
 
   const handleItemClick = (item) => {
@@ -60,7 +67,7 @@ const Sidebar = ({
     <>
       {/* Desktop Sidebar */}
       <div
-        className={`hidden lg:block fixed inset-y-0 left-0 z-50 bg-gradient-to-b from-blue-700 via-blue-800 to-blue-900 shadow-2xl transition-all duration-300 ease-in-out ${
+        className={`hidden lg:block fixed inset-y-0 left-0 z-50 bg-gradient-to-b from-gray-800 via-blue-800 to-gray-900 shadow-2xl transition-all duration-300 ease-in-out ${
           collapsed ? "w-20" : "w-64"
         }`}
       >
@@ -116,7 +123,7 @@ const Sidebar = ({
 
       {/* Mobile Sidebar */}
       <div
-        className={`lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-blue-700 via-blue-800 to-blue-900 shadow-2xl transform ${
+        className={`lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-gray-800 via-blue-800 to-gray-900 shadow-2xl transform ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-200 ease-in-out`}
       >

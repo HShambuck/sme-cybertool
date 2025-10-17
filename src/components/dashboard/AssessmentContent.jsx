@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // ✅ ADD THIS
 import IntroPage from "./assessment/IntroPage";
 import QuestionPage from "./assessment/QuestionPage";
 import ReviewPage from "./assessment/ReviewPage";
@@ -7,7 +8,8 @@ import AssessmentResults from "../../pages/AssessmentResults";
 import { assessmentQuestions } from "./assessment/assessmentQuestions";
 import { createAssessment } from "../../services/assessment";
 
-const AssessmentContent = ({setCurrentView}) => {
+const AssessmentContent = ({ setCurrentView }) => {
+  const navigate = useNavigate(); // ✅ ADD THIS
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(false);
@@ -72,9 +74,9 @@ const AssessmentContent = ({setCurrentView}) => {
       const result = await createAssessment({ questionsAnswered });
       console.log("✅ Assessment result:", result);
 
-      setAssessmentResult(result.assessment); // ✅ store the result
+      setAssessmentResult(result.assessment);
       setLoading(false);
-      setCurrentStep(maxSteps); // ✅ switch to results view
+      setCurrentStep(maxSteps);
     } catch (err) {
       console.error("❌ Submit error:", err);
       setError(
@@ -86,19 +88,35 @@ const AssessmentContent = ({setCurrentView}) => {
     }
   };
 
-  // ✅ If assessment result exists, show results component inside the same content
+  // ✅ MODIFIED: Handle returning to dashboard with refresh flag
+  const handleReturnToDashboard = () => {
+    // Navigate back to dashboard with state to trigger refresh
+    navigate("/dashboard", {
+      state: {
+        refreshData: true,
+        view: "dashboard",
+      },
+      replace: true,
+    });
+  };
+
+  // ✅ If assessment result exists, show results with custom return handler
   if (assessmentResult) {
     return (
       <AssessmentResults
         assessment={assessmentResult}
         setCurrentView={setCurrentView}
+        onReturnToDashboard={handleReturnToDashboard} // ✅ Pass custom handler
       />
     );
   }
 
   if (currentStep === 0) {
     return (
-      <IntroPage onNext={handleNext} onCancel={() => setCurrentView("dashboard")} />
+      <IntroPage
+        onNext={handleNext}
+        onCancel={() => setCurrentView("dashboard")}
+      />
     );
   }
 

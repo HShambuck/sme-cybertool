@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Bell, Settings } from "lucide-react";
+import { Bell, Settings, Globe, History } from "lucide-react";
 import { AlertTriangle } from "lucide-react";
 import Sidebar from "../components/dashboard/Sidebar";
 import Header from "../components/dashboard/Header";
@@ -9,6 +9,8 @@ import AssessmentContent from "../components/dashboard/AssessmentContent";
 import TrainingModules from "../pages/TrainingModules";
 import PlaceholderPage from "../components/dashboard/PlaceholderPage";
 import ThreatUpdates from "../components/dashboard/ThreatUpdates";
+import WebsiteSecurityAnalysis from "../components/dashboard/WebsiteSecurityAnalysis";
+import ScanHistory from "../components/dashboard/ScanHistory";
 import { getDashboardData } from "../services/dashboard";
 import { getThreatUpdates } from "../services/threats";
 import {
@@ -83,6 +85,8 @@ const Dashboard = () => {
   }, [location]);
 
   // Fetch dashboard data on component mount
+  // Update the useEffect in Dashboard.jsx that fetches data:
+
   useEffect(() => {
     const fetchUserAndData = async () => {
       // 1. Validate token
@@ -119,16 +123,21 @@ const Dashboard = () => {
       }
     };
 
+    // Initial fetch
     fetchUserAndData();
 
-    // Re-fetch when returning with refreshData flag
+    // ✅ ALSO refresh when location.state.refreshData is true
     if (location.state?.refreshData) {
-      console.log("🔄 Refreshing dashboard data...");
-      fetchUserAndData();
-      // Clear the state
+      console.log("🔄 Refreshing dashboard data after assessment...");
+      // Small delay to ensure backend has processed the assessment
+      setTimeout(() => {
+        fetchUserAndData();
+      }, 500);
+
+      // Clear the state to prevent continuous refreshing
       window.history.replaceState({}, document.title);
     }
-  }, [navigate, location.state?.refreshData]);
+  }, [navigate, location.state?.refreshData]); // ✅ Adding location.state?.refreshData as dependency
 
   // Add useEffect to monitor state changes
   useEffect(() => {
@@ -237,11 +246,19 @@ const Dashboard = () => {
             onRefresh={() => fetchThreats()}
           />
         );
-      case "settings":
+      case "security":
         return (
-          <PlaceholderPage
-            title="Settings"
-            icon={Settings}
+          <WebsiteSecurityAnalysis
+            title="Website Security"
+            icon={Globe}
+            setCurrentView={setCurrentView}
+          />
+        );
+      case "history":
+        return (
+          <ScanHistory
+            title="Scan History"
+            icon={History}
             setCurrentView={setCurrentView}
           />
         );

@@ -495,10 +495,10 @@ const TrainingModuleDetail = () => {
       )}
 
       <button
-        onClick={() => navigate("/training")}
+        onClick={() => navigate("/dashboard")}
         className="w-full px-6 py-3 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300"
       >
-        Back to All Modules
+        Back to Dashboard
       </button>
     </div>
   );
@@ -508,11 +508,11 @@ const TrainingModuleDetail = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <button
-          onClick={() => navigate("../training")}
+          onClick={() => navigate("../dashboard")}
           className="flex items-center text-slate-600 hover:text-slate-900 mb-6"
         >
           <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Modules
+          Back to Dashboard
         </button>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
