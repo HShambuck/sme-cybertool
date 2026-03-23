@@ -9,7 +9,7 @@ import {
 // Pages
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
-import Dashboard from "../pages/dashboard";
+import Dashboard from "../pages/Dashboard";
 import AssessmentContent from "../components/dashboard/AssessmentContent";
 import AssessmentResults from "../pages/AssessmentResults";
 import TrainingModules from "../pages/TrainingModules";
