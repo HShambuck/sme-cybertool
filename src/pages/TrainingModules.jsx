@@ -1,21 +1,9 @@
-// pages/TrainingModules.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  BookOpen,
-  Clock,
-  Award,
-  Search,
-  Filter,
-  ChevronRight,
-  Play,
-  CheckCircle,
-  TrendingUp,
-  Home,
-  Star,
-  Users,
-  Target,
-  Zap,
+  BookOpen, Clock, Award, Search, Filter, ChevronRight,
+  Play, CheckCircle, TrendingUp, Star, Users, Target, Zap, 
+  ShieldCheck, Activity, GraduationCap
 } from "lucide-react";
 import { getAllModules, getRecommendedModules } from "../services/training";
 
@@ -30,22 +18,12 @@ const TrainingModules = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState("");
 
   const categories = [
-    { value: "", label: "All Categories", icon: Target },
-    { value: "security_measure", label: "Security Measures", color: "blue" },
+    { value: "", label: "All Nodes", icon: Target },
+    { value: "security_measure", label: "Security", color: "blue" },
     { value: "data_protection", label: "Data Protection", color: "green" },
     { value: "technical", label: "Technical", color: "purple" },
-    { value: "training", label: "Security Training", color: "orange" },
+    { value: "training", label: "Training", color: "orange" },
     { value: "policy", label: "Policy", color: "indigo" },
-    { value: "physical_security", label: "Physical Security", color: "red" },
-    { value: "device_security", label: "Device Security", color: "pink" },
-    { value: "vendor", label: "Vendor Management", color: "teal" },
-  ];
-
-  const difficulties = [
-    { value: "", label: "All Levels" },
-    { value: "beginner", label: "Beginner" },
-    { value: "intermediate", label: "Intermediate" },
-    { value: "advanced", label: "Advanced" },
   ];
 
   useEffect(() => {
@@ -63,7 +41,7 @@ const TrainingModules = () => {
       });
       setModules(data);
     } catch (err) {
-      setError("Failed to load training modules");
+      setError("Terminal Connection Failed: Unable to load modules.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -79,24 +57,13 @@ const TrainingModules = () => {
     }
   };
 
-  const getDifficultyColor = (difficulty) => {
-    switch (difficulty) {
-      case "beginner":
-        return "bg-emerald-100 text-emerald-800 border-emerald-200";
-      case "intermediate":
-        return "bg-amber-100 text-amber-800 border-amber-200";
-      case "advanced":
-        return "bg-rose-100 text-rose-800 border-rose-200";
-      default:
-        return "bg-slate-100 text-slate-800 border-slate-200";
+  const getDifficultyStyles = (diff) => {
+    switch (diff) {
+      case "beginner": return "text-emerald-500 bg-emerald-500/10 border-emerald-500/20";
+      case "intermediate": return "text-amber-500 bg-amber-500/10 border-amber-500/20";
+      case "advanced": return "text-rose-500 bg-rose-500/10 border-rose-500/20";
+      default: return "text-slate-400 bg-slate-400/10 border-slate-400/20";
     }
-  };
-
-  const getProgressColor = (progress) => {
-    if (progress === 0) return "bg-slate-300";
-    if (progress < 50) return "bg-gradient-to-r from-amber-400 to-amber-500";
-    if (progress < 100) return "bg-gradient-to-r from-blue-500 to-blue-600";
-    return "bg-gradient-to-r from-emerald-500 to-emerald-600";
   };
 
   const ModuleCard = ({ module, isRecommended = false }) => {
@@ -105,121 +72,86 @@ const TrainingModules = () => {
 
     return (
       <div
-        className={`bg-white rounded-xl shadow-sm border ${
-          isRecommended
-            ? "border-orange-200 ring-2 ring-orange-200"
-            : "border-slate-200"
-        } hover:shadow-md transition-all cursor-pointer`}
         onClick={() => navigate(`/training/${module._id}`)}
+        className={`group relative bg-[#0F172A] rounded-[32px] border transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] ${
+          isRecommended ? "border-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.1)]" : "border-slate-800/50 shadow-xl"
+        } hover:border-blue-500/50`}
       >
+        {/* Recommended Pulse Badge */}
         {isRecommended && (
-          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-            <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs font-bold px-4 py-1 rounded-full shadow-lg flex items-center">
-              <Zap className="h-3 w-3 mr-1" />
-              Recommended
+          <div className="absolute -top-3 left-8 z-20">
+            <div className="bg-amber-500 text-white text-[9px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-full flex items-center shadow-lg">
+              <Zap className="h-3 w-3 mr-1.5 fill-white" /> Recommended
             </div>
           </div>
         )}
 
-        {/* Status Badge */}
+        {/* Completion Icon */}
         {status === "completed" && (
-          <div className="absolute -top-3 -right-3 z-10">
-            <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-2 rounded-full shadow-lg">
-              <CheckCircle className="h-5 w-5" />
+          <div className="absolute top-6 right-6 z-10">
+            <div className="bg-emerald-500/20 p-2 rounded-xl border border-emerald-500/30">
+              <CheckCircle className="h-5 w-5 text-emerald-500" />
             </div>
           </div>
         )}
 
-        <div className="p-6">
-          {/* Header */}
-          <div className="mb-4">
-            <h3 className="text-xl font-bold text-slate-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+        <div className="p-8 space-y-6">
+          {/* Category & Rating */}
+          <div className="flex items-center justify-between">
+            <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${getDifficultyStyles(module.difficulty)}`}>
+              {module.difficulty}
+            </span>
+            {module.averageRating > 0 && (
+              <div className="flex items-center text-amber-500 space-x-1">
+                <Star className="h-3 w-3 fill-amber-500" />
+                <span className="text-[10px] font-black">{module.averageRating.toFixed(1)}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Title & Desc */}
+          <div>
+            <h3 className="text-xl font-black text-white leading-tight mb-2 group-hover:text-blue-500 transition-colors tracking-tight">
               {module.title}
             </h3>
-            <p className="text-sm text-slate-600 line-clamp-3">
+            <p className="text-slate-500 text-xs leading-relaxed line-clamp-2 font-medium">
               {module.description}
             </p>
           </div>
 
-          {/* Metadata */}
-          <div className="flex items-center gap-2 mb-4 flex-wrap">
-            <span
-              className={`text-xs font-bold px-3 py-1.5 rounded-full border ${getDifficultyColor(
-                module.difficulty
-              )}`}
-            >
-              {module.difficulty.charAt(0).toUpperCase() +
-                module.difficulty.slice(1)}
-            </span>
-            <span className="flex items-center text-xs font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full">
-              <Clock className="h-3.5 w-3.5 mr-1.5" />
-              {module.estimatedDuration} min
-            </span>
-            {module.completionCount > 0 && (
-              <span className="flex items-center text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full">
-                <Users className="h-3.5 w-3.5 mr-1.5" />
-                {module.completionCount} completed
-              </span>
-            )}
-            {module.averageRating > 0 && (
-              <span className="flex items-center text-xs font-medium text-amber-600 bg-amber-50 px-3 py-1.5 rounded-full">
-                <Star className="h-3.5 w-3.5 mr-1.5 fill-amber-400" />
-                {module.averageRating.toFixed(1)}
-              </span>
-            )}
-          </div>
-
           {/* Progress Bar */}
           {status !== "not_started" && (
-            <div className="mb-4">
-              <div className="flex items-center justify-between text-xs font-semibold text-slate-700 mb-2">
-                <span className="capitalize">{status.replace("_", " ")}</span>
-                <span>{progress}%</span>
+            <div className="space-y-2">
+              <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                <span className="text-slate-600">{status.replace("_", " ")}</span>
+                <span className="text-blue-500">{progress}%</span>
               </div>
-              <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
                 <div
-                  className={`h-3 rounded-full transition-all duration-500 ${getProgressColor(
-                    progress
-                  )}`}
+                  className="h-full bg-blue-600 transition-all duration-1000"
                   style={{ width: `${progress}%` }}
-                ></div>
+                />
               </div>
             </div>
           )}
 
-          {/* Footer */}
-          <div className="flex items-center justify-between mt-6 pt-4 border-t-2 border-slate-100">
-            <div className="flex items-center gap-3 text-xs font-medium text-slate-500">
-              {module.content?.steps && (
-                <span className="flex items-center">
-                  <BookOpen className="h-4 w-4 mr-1" />
-                  {module.content.steps.length} steps
-                </span>
-              )}
-              {module.quiz?.questions && (
-                <span className="flex items-center">
-                  <Award className="h-4 w-4 mr-1" />
-                  Quiz
-                </span>
-              )}
+          {/* Metadata Footer */}
+          <div className="flex items-center justify-between pt-6 border-t border-slate-800/50">
+            <div className="flex items-center space-x-4 text-slate-500">
+               <div className="flex items-center text-[10px] font-black uppercase tracking-widest">
+                  <Clock className="h-3.5 w-3.5 mr-1.5" /> {module.estimatedDuration}M
+               </div>
+               {module.completionCount > 0 && (
+                 <div className="flex items-center text-[10px] font-black uppercase tracking-widest">
+                   <Users className="h-3.5 w-3.5 mr-1.5" /> {module.completionCount}
+                 </div>
+               )}
             </div>
-            <button className="flex items-center text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-4 py-2 rounded-lg transition-all shadow-md group-hover:shadow-lg">
-              {status === "completed" ? (
-                <>
-                  Review
-                  <CheckCircle className="h-4 w-4 ml-2" />
-                </>
-              ) : status === "in_progress" ? (
-                <>
-                  Continue
-                  <Play className="h-4 w-4 ml-2" />
-                </>
-              ) : (
-                <>
-                  Start
-                  <ChevronRight className="h-4 w-4 ml-2" />
-                </>
-              )}
+            
+            <button className={`p-3 rounded-2xl transition-all ${
+              status === "completed" ? "bg-emerald-500/10 text-emerald-500" : "bg-blue-600 text-white shadow-lg shadow-blue-600/20 group-hover:bg-blue-500"
+            }`}>
+              {status === "in_progress" ? <Play className="h-4 w-4 fill-white" /> : <ChevronRight className="h-4 w-4" />}
             </button>
           </div>
         </div>
@@ -229,139 +161,122 @@ const TrainingModules = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-center h-96">
-            <div className="text-center">
-              <div className="relative w-20 h-20 mx-auto mb-6">
-                <div className="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
-                <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
-              </div>
-              <p className="text-slate-700 font-semibold text-lg">
-                Loading training modules...
-              </p>
-            </div>
-          </div>
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="relative">
+          <div className="h-20 w-20 rounded-full border-[3px] border-slate-800 border-t-blue-500 animate-spin"></div>
+          <GraduationCap className="h-6 w-6 text-blue-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
         </div>
+        <p className="mt-8 text-slate-500 font-black uppercase tracking-[0.3em] text-[10px]">Syncing Academy Nodes...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-5">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        {/* <div>
-          <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-3">
-            Training Modules
-          </h1>
-          <p className="text-slate-600 text-lg">
-            Master cybersecurity with our expert-curated training programs
-          </p>
-        </div> */}
-
-        {/* Recommended Section */}
-        {recommendedModules.length > 0 && (
-          <div className="mb-10">
-            <div className="flex items-center mb-6">
-              <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-2 rounded-xl shadow-lg mr-3">
-                <TrendingUp className="h-6 w-6 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-slate-900">
-                Recommended for You
-              </h2>
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+      
+      {/* 1. ELITE ACADEMY HEADER */}
+      <div className="bg-[#0F172A] border border-slate-800/50 rounded-[40px] p-12 relative overflow-hidden shadow-2xl">
+        <div className="absolute top-[-20%] right-[-10%] w-96 h-96 bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div className="space-y-4">
+            <div className="inline-flex items-center space-x-2 text-blue-500">
+              <Zap className="h-5 w-5 fill-blue-500" />
+              <span className="text-[11px] font-black uppercase tracking-[0.4em]">SME Academy v2.4</span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {recommendedModules.map((module) => (
-                <ModuleCard
-                  key={module._id}
-                  module={module}
-                  isRecommended={true}
-                />
-              ))}
-            </div>
+            <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight leading-[1.1]">
+              Knowledge <br/> <span className="text-blue-500 italic">Defense Nodes</span>
+            </h1>
           </div>
-        )}
-
-        {/* Filters */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border-2 border-white p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search modules..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white font-medium"
-              />
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl">
+               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Modules</p>
+               <p className="text-3xl font-black text-white">{modules.length}</p>
             </div>
-
-            {/* Category */}
-            <div className="relative">
-              <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 z-10" />
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white font-medium cursor-pointer"
-              >
-                {categories.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Difficulty */}
-            <div>
-              <select
-                value={selectedDifficulty}
-                onChange={(e) => setSelectedDifficulty(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white font-medium cursor-pointer"
-              >
-                {difficulties.map((diff) => (
-                  <option key={diff.value} value={diff.value}>
-                    {diff.label}
-                  </option>
-                ))}
-              </select>
+            <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-3xl">
+               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Rank</p>
+               <p className="text-3xl font-black text-blue-500 italic">PRO</p>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Error */}
-        {error && (
-          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-6">
-            <p className="text-red-800 font-medium">{error}</p>
+      {/* 2. RECENT RECOMMENDATIONS (HORIZONTAL) */}
+      {recommendedModules.length > 0 && !selectedCategory && (
+        <div className="space-y-6">
+          <div className="flex items-center space-x-3">
+            <div className="h-6 w-1 bg-amber-500 rounded-full" />
+            <h2 className="text-lg font-black text-white uppercase tracking-widest">Recommended Priority</h2>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {recommendedModules.map((module) => (
+              <ModuleCard key={module._id} module={module} isRecommended={true} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 3. TERMINAL FILTER BAR */}
+      <div className="bg-[#0F172A] border border-slate-800/50 rounded-[32px] p-4 flex flex-col lg:flex-row items-center gap-4 sticky top-24 z-30 shadow-2xl backdrop-blur-md">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+          <input
+            type="text"
+            placeholder="Search Security Library..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl pl-12 pr-4 py-4 text-xs font-bold text-white outline-none focus:border-blue-500 transition-all placeholder:text-slate-600"
+          />
+        </div>
+
+        <div className="flex items-center gap-2 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0 scrollbar-hide">
+          {categories.map((cat) => (
+            <button
+              key={cat.value}
+              onClick={() => setSelectedCategory(cat.value)}
+              className={`px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${
+                selectedCategory === cat.value
+                ? "bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-600/20"
+                : "bg-slate-900/50 text-slate-500 border-slate-800 hover:text-slate-300 hover:border-slate-700"
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 4. ALL NODES GRID */}
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+           <div className="flex items-center space-x-3">
+              <div className="h-6 w-1 bg-blue-600 rounded-full" />
+              <h2 className="text-lg font-black text-white uppercase tracking-widest">Available Nodes</h2>
+           </div>
+           <select
+              value={selectedDifficulty}
+              onChange={(e) => setSelectedDifficulty(e.target.value)}
+              className="bg-transparent text-slate-500 font-black text-[10px] uppercase tracking-widest outline-none cursor-pointer hover:text-blue-500"
+           >
+              <option value="">Filter Difficulty</option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+           </select>
+        </div>
+
+        {modules.length === 0 ? (
+          <div className="py-20 text-center bg-[#0F172A] border border-slate-800 border-dashed rounded-[40px]">
+            <BookOpen className="h-12 w-12 text-slate-800 mx-auto mb-4" />
+            <p className="text-slate-600 font-black uppercase tracking-widest text-xs">No Nodes Found matching search parameters</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {modules.map((module) => (
+              <ModuleCard key={module._id} module={module} />
+            ))}
           </div>
         )}
-
-        {/* All Modules */}
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center">
-            <BookOpen className="h-7 w-7 mr-2 text-blue-600" />
-            All Modules
-            <span className="ml-3 text-lg font-normal text-slate-500">
-              ({modules.length})
-            </span>
-          </h2>
-          {modules.length === 0 ? (
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border-2 border-slate-200 p-16 text-center">
-              <BookOpen className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-              <p className="text-slate-600 text-lg font-medium">
-                No modules found matching your criteria
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {modules.map((module) => (
-                <ModuleCard key={module._id} module={module} />
-              ))}
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

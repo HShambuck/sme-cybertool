@@ -1,16 +1,20 @@
+// src/pages/Dashboard.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Bell, Settings, Globe, History } from "lucide-react";
-import { AlertTriangle } from "lucide-react";
+import { Bell, Settings, Globe, History, Shield, LayoutDashboard, ChevronRight, Activity, AlertTriangle } from "lucide-react";
+
+// COMPONENTS
 import Sidebar from "../components/dashboard/Sidebar";
 import Header from "../components/dashboard/Header";
 import OverviewContent from "../components/dashboard/OverviewContent";
 import AssessmentContent from "../components/dashboard/AssessmentContent";
 import TrainingModules from "../pages/TrainingModules";
-import PlaceholderPage from "../components/dashboard/PlaceholderPage";
 import ThreatUpdates from "../components/dashboard/ThreatUpdates";
 import WebsiteSecurityAnalysis from "../components/dashboard/WebsiteSecurityAnalysis";
 import ScanHistory from "../components/dashboard/ScanHistory";
+import ProfileSettings from "../components/dashboard/ProfileSettings"; 
+
+// SERVICES & DATA
 import { getDashboardData } from "../services/dashboard";
 import { getThreatUpdates } from "../services/threats";
 import {
@@ -31,261 +35,120 @@ const Dashboard = () => {
   const [userDropdown, setUserDropdown] = useState(false);
   const [user, setUser] = useState(null);
 
-  // State for dashboard data
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // State for threat data (lifted from ThreatUpdates)
   const [threats, setThreats] = useState([]);
   const [threatsLoading, setThreatsLoading] = useState(true);
-  const [threatsError, setThreatsError] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
-  const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // Check if token is valid
   const isTokenValid = () => {
     const token = localStorage.getItem("token");
     if (!token) return false;
-
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
-      const isExpired = Date.now() >= payload.exp * 1000;
-      return !isExpired;
+      return Date.now() < payload.exp * 1000;
     } catch (error) {
-      console.error("🔍 Invalid token format:", error);
       return false;
     }
   };
 
-  // Fetch threats data
-  const fetchThreats = async (silent = false) => {
+  const fetchUserAndData = async () => {
+    if (!isTokenValid()) {
+      localStorage.removeItem("token");
+      navigate("/login");
+      return;
+    }
+
     try {
-      if (!silent) setThreatsLoading(true);
-      setThreatsError(null);
-      const data = await getThreatUpdates();
-      setThreats(data);
+      setLoading(true);
+      const [profile, data, threatData] = await Promise.all([
+        getUserProfile(),
+        getDashboardData(),
+        getThreatUpdates()
+      ]);
+      
+      setUser(profile);
+      setDashboardData(data);
+      setThreats(threatData);
       setLastUpdate(new Date());
     } catch (err) {
-      setThreatsError("Failed to fetch threat updates.");
-      console.error(err);
-    } finally {
-      if (!silent) setThreatsLoading(false);
-    }
-  };
-
-  // Effect added to handle navigation state
-  useEffect(() => {
-    // Check if we're returning from assessment with instructions
-    if (location.state?.view) {
-      setCurrentView(location.state.view);
-      // Clearing the state to prevent it from persisting
-      window.history.replaceState({}, document.title);
-    }
-  }, [location]);
-
-  // Fetch dashboard data on component mount
-  // Update the useEffect in Dashboard.jsx that fetches data:
-
-  useEffect(() => {
-    const fetchUserAndData = async () => {
-      // 1. Validate token
-      if (!isTokenValid()) {
-        console.log("🚨 Token invalid or expired, redirecting to login");
+      if (err.response?.status === 401) {
         localStorage.removeItem("token");
         navigate("/login");
         return;
       }
-
-      try {
-        // 2. Fetch profile
-        const profile = await getUserProfile();
-        console.log("👤 User profile loaded:", profile);
-        setUser(profile);
-
-        // 3. Fetch dashboard data
-        console.log("🚀 Starting dashboard data fetch...");
-        setLoading(true);
-        const data = await getDashboardData();
-        setDashboardData(data);
-        console.log("✅ Dashboard data received:", data);
-      } catch (err) {
-        console.error("❌ Error fetching dashboard data:", err);
-        if (err.response?.status === 401) {
-          console.log("🚨 401 Unauthorized - clearing token and redirecting");
-          localStorage.removeItem("token");
-          navigate("/login");
-          return;
-        }
-        setError(`Failed to load dashboard data: ${err.message}`);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Initial fetch
-    fetchUserAndData();
-
-    // ✅ ALSO refresh when location.state.refreshData is true
-    if (location.state?.refreshData) {
-      console.log("🔄 Refreshing dashboard data after assessment...");
-      // Small delay to ensure backend has processed the assessment
-      setTimeout(() => {
-        fetchUserAndData();
-      }, 500);
-
-      // Clear the state to prevent continuous refreshing
-      window.history.replaceState({}, document.title);
+      setError(`Terminal Link Failure: ${err.message}`);
+    } finally {
+      setLoading(false);
+      setThreatsLoading(false);
     }
-  }, [navigate, location.state?.refreshData]); // ✅ Adding location.state?.refreshData as dependency
-
-  // Add useEffect to monitor state changes
-  useEffect(() => {
-    console.log(
-      "📊 State update - Loading:",
-      loading,
-      "Error:",
-      error,
-      "HasData:",
-      !!dashboardData
-    );
-  }, [loading, error, dashboardData]);
-
-  // Default fallback values for new users
-  const fallbackData = {
-    riskData: {
-      score: 0,
-      message:
-        "No assessment has been made yet. Start by taking a new assessment!",
-      completed: "None",
-    },
-    recommendations: [],
-    recentAlerts: [],
-    trainingProgress: {
-      percentage: 0,
-      completed: 0,
-      total: 0,
-      message: "No training started yet. Begin with your first module!",
-    },
-    threatUpdates: [],
   };
 
-  // Render function
-  const renderContent = () => {
-    console.log(
-      "🎨 Rendering content - Loading:",
-      loading,
-      "Error:",
-      error,
-      "HasData:",
-      !!dashboardData
-    );
+  useEffect(() => {
+    fetchUserAndData();
+    if (location.state?.view) {
+      setCurrentView(location.state.view);
+      window.history.replaceState({}, document.title);
+    }
+  }, [navigate]);
 
+  const renderContent = () => {
     if (loading) {
       return (
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-600 mx-auto mb-4"></div>
-            <p className="text-slate-600 font-medium">Loading dashboard...</p>
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+          <div className="relative">
+            <div className="h-20 w-20 rounded-full border-[3px] border-slate-800 border-t-blue-500 animate-spin"></div>
+            <Activity className="h-6 w-6 text-blue-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
           </div>
+          <p className="mt-8 text-slate-500 font-black uppercase tracking-[0.3em] text-[10px]">Establishing Secure Link...</p>
         </div>
       );
     }
 
     if (error) {
       return (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-          <div className="flex items-center mb-3">
-            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
-            </div>
-            <h3 className="text-red-900 font-semibold text-lg">
-              Error Loading Dashboard
-            </h3>
-          </div>
-          <p className="text-red-700 mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm"
-          >
-            Retry
+        <div className="max-w-2xl mx-auto mt-12 bg-[#0F172A] border border-red-500/20 rounded-[32px] p-12 text-center shadow-2xl shadow-red-900/20">
+          <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-6" />
+          <h3 className="text-2xl font-black text-white tracking-tight mb-2">Interface Error</h3>
+          <p className="text-slate-400 mb-8 font-medium">{error}</p>
+          <button onClick={() => window.location.reload()} className="px-8 py-4 bg-red-600 text-white rounded-2xl hover:bg-red-500 transition-all font-bold">
+            Reset Connection
           </button>
         </div>
       );
     }
 
+    const viewProps = {
+      riskData: dashboardData?.riskData || defaultRiskData,
+      recommendations: dashboardData?.recommendations || defaultRecommendations,
+      recentAlerts: dashboardData?.recentAlerts || defaultAlerts,
+      trainingProgress: dashboardData?.trainingProgress || defaultTrainingProgress,
+      threatUpdates: threats.length > 0 ? threats : defaultThreatUpdates,
+      setCurrentView: setCurrentView,
+      user: user 
+    };
+
     switch (currentView) {
-      case "dashboard":
-        return (
-          <OverviewContent
-            riskData={dashboardData?.riskData || defaultRiskData}
-            recommendations={
-              dashboardData?.recommendations || defaultRecommendations
-            }
-            recentAlerts={dashboardData?.recentAlerts || defaultAlerts}
-            trainingProgress={
-              dashboardData?.trainingProgress || defaultTrainingProgress
-            }
-            threatUpdates={threats.length > 0 ? threats : defaultThreatUpdates}
-            setCurrentView={setCurrentView}
-          />
-        );
-      case "assessment":
-        return <AssessmentContent setCurrentView={setCurrentView} />;
-      case "training":
-        return <TrainingModules />;
-      case "threats":
-        return (
-          <ThreatUpdates
-            threats={threats}
-            loading={threatsLoading}
-            error={threatsError}
-            lastUpdate={lastUpdate}
-            autoRefresh={autoRefresh}
-            setAutoRefresh={setAutoRefresh}
-            onRefresh={() => fetchThreats()}
-          />
-        );
-      case "security":
-        return (
-          <WebsiteSecurityAnalysis
-            title="Website Security"
-            icon={Globe}
-            setCurrentView={setCurrentView}
-          />
-        );
-      case "history":
-        return (
-          <ScanHistory
-            title="Scan History"
-            icon={History}
-            setCurrentView={setCurrentView}
-          />
-        );
-      default:
-        return (
-          <OverviewContent
-            riskData={dashboardData?.riskData || fallbackData.riskData}
-            recommendations={
-              dashboardData?.recommendations || fallbackData.recommendations
-            }
-            recentAlerts={
-              dashboardData?.recentAlerts || fallbackData.recentAlerts
-            }
-            trainingProgress={
-              dashboardData?.trainingProgress || fallbackData.trainingProgress
-            }
-            threatUpdates={
-              threats.length > 0 ? threats : fallbackData.threatUpdates
-            }
-            setCurrentView={setCurrentView}
-          />
-        );
+      case "dashboard": return <OverviewContent {...viewProps} />;
+      case "assessment": return <AssessmentContent setCurrentView={setCurrentView} />;
+      case "training": return <TrainingModules />;
+      case "threats": return <ThreatUpdates threats={threats} loading={threatsLoading} onRefresh={() => fetchUserAndData()} />;
+      case "security": return <WebsiteSecurityAnalysis title="Web Security" icon={Globe} setCurrentView={setCurrentView} />;
+      case "settings": return <ProfileSettings user={user} />; 
+      case "history": return <ScanHistory title="Scan History" icon={History} setCurrentView={setCurrentView} />;
+      default: return <OverviewContent {...viewProps} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex">
+    <div className="min-h-screen bg-[#020617] flex font-['Inter',sans-serif]">
+      {/* Background Glow */}
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/5 rounded-full blur-[120px]" />
+      </div>
+
       <Sidebar
         currentView={currentView}
         setCurrentView={setCurrentView}
@@ -295,11 +158,7 @@ const Dashboard = () => {
         setCollapsed={setCollapsed}
       />
 
-      <div
-        className={`flex-1 transition-all duration-300 ${
-          collapsed ? "lg:ml-20" : "lg:ml-64"
-        }`}
-      >
+      <div className={`flex-1 relative z-10 transition-all duration-500 ease-in-out ${collapsed ? "lg:ml-20" : "lg:ml-72"}`}>
         <Header
           setSidebarOpen={setSidebarOpen}
           collapsed={collapsed}
@@ -309,15 +168,31 @@ const Dashboard = () => {
           setCurrentView={setCurrentView}
         />
 
-        <main className="p-6 pt-20">{renderContent()}</main>
+        <main className="p-8 pt-28 max-w-[1600px] mx-auto">
+          {/* Breadcrumb */}
+          <div className="flex items-center space-x-3 mb-10">
+            <div className="h-8 w-1 bg-blue-600 rounded-full"></div>
+            <div>
+              <div className="flex items-center space-x-2 text-[10px] font-black uppercase tracking-[0.25em] text-slate-500">
+                <LayoutDashboard className="h-3 w-3" />
+                <span>Network Node</span>
+                <ChevronRight className="h-3 w-3" />
+                <span className="text-blue-500">{currentView}</span>
+              </div>
+              <h1 className="text-2xl font-black text-white tracking-tight mt-1 capitalize">
+                {currentView === 'dashboard' ? 'System Overview' : currentView.replace('-', ' ')}
+              </h1>
+            </div>
+          </div>
+
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {renderContent()}
+          </div>
+        </main>
       </div>
 
-      {/* Overlay for mobile sidebar */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        ></div>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 lg:hidden" onClick={() => setSidebarOpen(false)}></div>
       )}
     </div>
   );
