@@ -1,169 +1,104 @@
+// src/components/dashboard/overview/RiskAssessmentCard.jsx
 import React from "react";
-import { CheckCircle, Shield } from "lucide-react";
+import { ShieldCheck, Zap, ArrowRight, Clock, Activity } from "lucide-react";
 
 const RiskAssessmentCard = ({ riskData, setCurrentView }) => {
-  // Format the date properly
-  const formatDate = (dateString) => {
-    if (!dateString || dateString === "N/A") return "N/A";
-
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    } catch (error) {
-      return dateString;
-    }
-  };
-
-  // Calculate weeks ago from lastAssessment date
-  const calculateWeeksAgo = (dateString) => {
-    if (!dateString || dateString === "N/A") return "N/A";
-
-    try {
-      const assessmentDate = new Date(dateString);
-      const now = new Date();
-      const diffTime = Math.abs(now - assessmentDate);
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays < 7) {
-        return { type: "days", value: diffDays };
-      } else {
-        const diffWeeks = Math.floor(diffDays / 7);
-        return { type: "weeks", value: diffWeeks };
-      }
-    } catch (error) {
-      return "N/A";
-    }
-  };
-
-  const formattedDate = formatDate(riskData.lastAssessment);
-  const weeksAgo = calculateWeeksAgo(riskData.lastAssessment);
-
-  // Determine color scheme based on score
-  const getColorScheme = (score) => {
-    if (score >= 80)
-      return {
-        progress: "bg-emerald-500",
-        text: "text-emerald-600",
-        badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      };
-    if (score >= 50)
-      return {
-        progress: "bg-amber-500",
-        text: "text-amber-600",
-        badge: "bg-amber-50 text-amber-700 border-amber-200",
-      };
-    return {
-      progress: "bg-red-500",
-      text: "text-red-600",
-      badge: "bg-red-50 text-red-700 border-red-200",
-    };
-  };
-
-  const colors = getColorScheme(riskData.score);
+  // Logic for color coding based on score
+  const score = riskData?.score || 0;
+  const isHighRisk = score < 50;
+  const isOptimal = score >= 80;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Main Score Section */}
-      <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-8 border border-slate-200">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-            <Shield className="h-6 w-6 text-blue-600" />
-          </div>
-          <h2 className="text-xl font-bold text-slate-900">
-            Your Latest Risk Assessment
-          </h2>
-        </div>
-
-        <div className="flex items-end space-x-4 mb-6">
-          <div className={`text-7xl font-bold ${colors.text}`}>
-            {riskData.score}
-          </div>
-          <div className="text-4xl font-light text-slate-300 pb-3">/100</div>
-        </div>
-
-        {/* Progress bar */}
-        <div className="mb-4">
-          <div className="w-full bg-slate-100 rounded-full h-3 mb-3">
-            <div
-              className={`${colors.progress} h-3 rounded-full transition-all duration-500`}
-              style={{ width: `${riskData.score}%` }}
-            ></div>
-          </div>
-          <div className="flex justify-between items-center">
-            <span
-              className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold border ${colors.badge}`}
-            >
-              {riskData.level}
-            </span>
-            <span className="text-sm text-slate-500">
-              Completed: {formattedDate}
-            </span>
-          </div>
-        </div>
-
-        {/* Supportive message */}
-        <div
-          className={`mt-6 p-4 rounded-xl border ${
-            riskData.score >= 80
-              ? "bg-emerald-50 border-emerald-200"
-              : riskData.score >= 50
-              ? "bg-amber-50 border-amber-200"
-              : "bg-red-50 border-red-200"
-          }`}
-        >
-          <p className="text-sm font-medium text-slate-700 flex items-start">
-            <span className="mr-2">
-              {riskData.score >= 80 ? "✓" : riskData.score >= 50 ? "⚠" : "⚠"}
-            </span>
-            <span>
-              {riskData.score >= 80
-                ? "Great job! Your business is showing strong resilience against risks. Keep following best practices."
-                : riskData.score >= 50
-                ? "You're in the medium risk zone. Addressing key recommendations will significantly boost your protection."
-                : "High risk detected! Immediate action is recommended to secure your business and data."}
-            </span>
-          </p>
-        </div>
+    <div className="bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#0F172A] border border-white/10 rounded-[40px] p-10 relative overflow-hidden group shadow-2xl">
+      
+      {/* Dynamic Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+           style={{ backgroundImage: 'radial-gradient(#3b82f6 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
       </div>
 
-      {/* Summary Card */}
-      <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200 flex flex-col justify-center text-center">
-        <div className="flex justify-center mb-4">
-          <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-            <CheckCircle className="h-7 w-7 text-emerald-600" />
+      {/* Decorative Large Icon Glow */}
+      <div className="absolute -top-10 -right-10 opacity-5 group-hover:opacity-10 transition-opacity duration-700">
+        <ShieldCheck className="h-80 w-80 text-blue-500 rotate-12" />
+      </div>
+
+      <div className="relative z-10">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-10">
+          <div>
+            <div className="flex items-center space-x-3 text-blue-500 mb-3">
+              <div className="bg-blue-500/10 p-2 rounded-lg">
+                <Zap className="h-4 w-4 fill-current animate-pulse" />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] italic">Infrastructure Audit Node</span>
+            </div>
+            <h2 className="text-5xl font-black text-white tracking-tighter leading-none">
+              Risk Level: <br />
+              <span className={isOptimal ? "text-emerald-400" : isHighRisk ? "text-red-500" : "text-amber-400"}>
+                {riskData?.level || "STANDBY"}
+              </span>
+            </h2>
+          </div>
+          
+          <button 
+            onClick={() => setCurrentView('assessment')}
+            className="group bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all shadow-xl shadow-blue-600/30 active:scale-95 flex items-center border border-blue-400/20"
+          >
+            Initialize New Scan 
+            <ArrowRight className="ml-3 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-end">
+          <div className="space-y-6">
+            <p className="text-slate-400 leading-relaxed font-medium text-lg max-w-md">
+              {riskData?.message || "Your SME profile is pending a full diagnostic. Initialize the neural scanner to map potential vulnerabilities."}
+            </p>
+            <div className="inline-flex items-center space-x-3 px-4 py-2 bg-white/5 rounded-full border border-white/5 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">
+              <Clock className="h-3.5 w-3.5" />
+              <span>Last Sync: {riskData?.lastAssessment || "Never Recorded"}</span>
+            </div>
+          </div>
+
+          {/* High-End Score Meter */}
+          <div className="relative group/meter">
+            <div className="absolute -inset-4 bg-blue-600/10 rounded-[32px] blur-2xl opacity-0 group-hover/meter:opacity-100 transition-opacity"></div>
+            <div className="relative bg-black/40 backdrop-blur-md rounded-[32px] p-8 border border-white/10 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2">Network Score</p>
+                <div className="flex items-baseline space-x-1">
+                  <h4 className="text-5xl font-black text-white tracking-tighter">{score}</h4>
+                  <span className="text-slate-600 font-bold text-xl">%</span>
+                </div>
+              </div>
+              
+              <div className="relative flex items-center justify-center">
+                <svg className="h-20 w-20 transform -rotate-90">
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="34"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="transparent"
+                    className="text-slate-800"
+                  />
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="34"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="transparent"
+                    strokeDasharray={213.6}
+                    strokeDashoffset={213.6 - (213.6 * score) / 100}
+                    className="text-blue-500 transition-all duration-1000 ease-out"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <Activity className="h-6 w-6 text-blue-500 absolute animate-pulse" />
+              </div>
+            </div>
           </div>
         </div>
-        <h3 className="text-lg font-bold text-slate-900 mb-2">
-          Assessment Status
-        </h3>
-        <p className="text-slate-600 mb-4">
-          {weeksAgo === "N/A"
-            ? "No recent assessments"
-            : weeksAgo.type === "days"
-            ? `Last checked: ${
-                weeksAgo.value === 0
-                  ? "today"
-                  : `${weeksAgo.value} ${
-                      weeksAgo.value === 1 ? "day" : "days"
-                    } ago`
-              }`
-            : `Last checked: ${weeksAgo.value} ${
-                weeksAgo.value === 1 ? "week" : "weeks"
-              } ago`}
-        </p>
-        <button
-          onClick={() => setCurrentView("assessment")}
-          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-sm cursor-pointer ease-in"
-        >
-          Run a New Assessment
-        </button>
-        <p className="text-xs text-center text-slate-500 mt-3">
-          Stay protected anytime
-        </p>
       </div>
     </div>
   );

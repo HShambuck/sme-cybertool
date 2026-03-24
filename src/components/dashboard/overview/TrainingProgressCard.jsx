@@ -1,61 +1,36 @@
+// src/components/dashboard/overview/TrainingProgressCard.jsx
 import React from "react";
+import { Target, BookOpen, ChevronRight } from "lucide-react";
 
 const TrainingProgressCard = ({ trainingProgress }) => {
+  const percentage = trainingProgress?.percentage || 0;
+
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
-      <h3 className="text-lg font-bold text-slate-900 mb-5">
-        Training Progress
-      </h3>
-      <div className="flex flex-col items-center">
-        <div className="relative inline-flex items-center justify-center mb-4">
-          <svg className="w-32 h-32 transform -rotate-90">
-            <circle
-              cx="64"
-              cy="64"
-              r="56"
-              stroke="#e5e7eb"
-              strokeWidth="10"
-              fill="transparent"
-            />
-            <circle
-              cx="64"
-              cy="64"
-              r="56"
-              stroke="url(#progressGradient)"
-              strokeWidth="10"
-              fill="transparent"
-              strokeLinecap="round"
-              strokeDasharray={`${2 * Math.PI * 56}`}
-              strokeDashoffset={`${
-                2 * Math.PI * 56 * (1 - trainingProgress.percentage / 100)
-              }`}
-              className="transition-all duration-500"
-            />
-            <defs>
-              <linearGradient
-                id="progressGradient"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="100%"
-              >
-                <stop offset="0%" stopColor="#2563eb" />
-                <stop offset="100%" stopColor="#3b82f6" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
-              {trainingProgress.percentage}%
-            </span>
-          </div>
+    <div className="bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-[32px] p-6 h-full flex flex-col shadow-xl">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-white font-black tracking-tight text-lg flex items-center italic">
+          <Target className="h-5 w-5 mr-3 text-indigo-500" />
+          Neural Training
+        </h3>
+        <BookOpen className="h-4 w-4 text-slate-600" />
+      </div>
+
+      <div className="flex-1 flex flex-col justify-center">
+        <div className="mb-6 text-center">
+          <h4 className="text-4xl font-black text-white tracking-tighter">{percentage}%</h4>
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1 italic">Knowledge Depth</p>
         </div>
-        <p className="text-sm font-semibold text-slate-700 mb-3">
-          Modules Completed: {trainingProgress.completed}/
-          {trainingProgress.total}
-        </p>
-        <button className="mt-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-sm font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-sm cursor-pointer ease-in">
-          Continue Learning
+
+        {/* Custom Midnight Progress Bar */}
+        <div className="w-full bg-black/40 rounded-full h-2 mb-6 border border-white/5 overflow-hidden">
+          <div 
+            className="bg-gradient-to-r from-indigo-600 to-blue-500 h-full transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(79,70,229,0.5)]"
+            style={{ width: `${percentage}%` }}
+          ></div>
+        </div>
+
+        <button className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-[10px] font-black text-white uppercase tracking-[0.2em] transition-all flex items-center justify-center group">
+          Resume Modules <ChevronRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
     </div>

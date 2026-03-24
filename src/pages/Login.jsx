@@ -1,113 +1,41 @@
 // src/pages/Login.jsx
 import React, { useState } from "react";
-import { loginUser } from "../services/auth";
 import { useNavigate } from "react-router-dom";
+import { loginUser } from "../services/auth";
 import {
   Shield,
+  Mail,
+  LockKeyhole,
   Eye,
   EyeOff,
-  Mail,
-  Lock,
   AlertCircle,
   ArrowRight,
   Loader2,
+  CheckCircle2
 } from "lucide-react";
 
-// Stable InputField outside component
-const InputField = ({
-  type = "text",
-  placeholder,
-  value,
-  onChange,
-  icon: Icon,
-  error,
-  showPasswordToggle = false,
-  onTogglePassword,
-}) => (
-  <div className="relative">
-    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-      <Icon className="h-5 w-5 text-gray-400" />
-    </div>
-    <input
-      type={type}
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-      className={`w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-        error ? "border-red-500" : ""
-      }`}
-    />
-    {showPasswordToggle && (
-      <button
-        type="button"
-        className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer ease-in"
-        onClick={onTogglePassword}
-      >
-        {type === "password" ? (
-          <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-        ) : (
-          <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-        )}
-      </button>
-    )}
-    {error && (
-      <div className="absolute -bottom-5 left-0 flex items-center text-red-500 text-sm">
-        <AlertCircle className="h-4 w-4 mr-1" />
-        {error}
-      </div>
-    )}
-  </div>
-);
-
-// Password input wrapper
-const PasswordInput = ({ value, onChange, error }) => {
-  const [show, setShow] = useState(false);
-  return (
-    <InputField
-      type={show ? "text" : "password"}
-      placeholder="Enter your password"
-      value={value}
-      onChange={onChange}
-      error={error}
-      icon={Lock}
-      showPasswordToggle
-      onTogglePassword={() => setShow(!show)}
-    />
-  );
-};
-
-const Login = ({ onLogin }) => {
+const Login = () => {
   const navigate = useNavigate();
-
-  const [loginForm, setLoginForm] = useState({
-    email: "",
-    password: "",
-    rememberMe: false,
-  });
+  const [loginForm, setLoginForm] = useState({ email: "", password: "", rememberMe: false });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
     setLoading(true);
     setErrors({});
 
-    const newErrors = {};
-    if (!loginForm.email) newErrors.email = "Email is required";
-    if (!loginForm.password) newErrors.password = "Password is required";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    if (!loginForm.email || !loginForm.password) {
+      setErrors({ form: "Please provide all security credentials." });
       setLoading(false);
       return;
     }
 
     try {
-      const data = await loginUser(
-        loginForm.email.trim().toLowerCase(),
-        loginForm.password
-      );
-
-      // Store token based on remember me
+      const data = await loginUser(loginForm.email.trim().toLowerCase(), loginForm.password);
+      
+      // Persistence logic
       if (loginForm.rememberMe) {
         localStorage.setItem("token", data.token);
       } else {
@@ -115,110 +43,181 @@ const Login = ({ onLogin }) => {
       }
 
       setLoading(false);
-      // redirect to dashboard
       navigate("/dashboard");
     } catch (err) {
       setLoading(false);
-      setErrors({ form: err.response?.data?.message || "Login failed" });
+      setErrors({ form: err.response?.data?.message || "Access Denied: Invalid credentials." });
     }
   };
 
-  // Functional state updates to prevent re-render bugs
-  const updateLoginForm = (field, value) => {
-    setLoginForm((prev) => ({ ...prev, [field]: value }));
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4">
-            <Shield className="h-8 w-8 text-white" />
+    <div className="min-h-screen bg-white flex flex-col md:flex-row font-['Inter',sans-serif]">
+      
+      {/* LEFT SIDE: Professional Branding Panel */}
+      <div className="hidden md:flex md:w-[45%] bg-[#0F172A] relative overflow-hidden flex-col justify-between p-16">
+        {/* Subtle UI Grid Overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
+        
+        {/* Logo Section */}
+        <div className="relative z-10">
+          <div className="flex items-center space-x-3">
+            <div className="bg-blue-600 p-2.5 rounded-xl shadow-lg shadow-blue-600/20">
+              <Shield className="h-7 w-7 text-white" />
+            </div>
+            <span className="text-2xl font-light text-white tracking-tighter">
+              Cyber<span className="font-black text-blue-500">Shield</span>
+            </span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome Back
-          </h1>
-          <p className="text-gray-600">
-            Sign in to your SME Security Dashboard
+        </div>
+
+        {/* Value Proposition Section */}
+        <div className="relative z-10">
+          <h2 className="text-5xl font-black text-white leading-[1.1] mb-8 tracking-tight">
+            Security for the <br /> 
+            <span className="text-blue-500 italic">Next Generation</span> <br /> 
+            of SMEs.
+          </h2>
+          <div className="space-y-6">
+            {[
+              "Real-time Threat Monitoring",
+              "AI-Powered Vulnerability Analysis",
+              "Regulatory Compliance Automation"
+            ].map((text, i) => (
+              <div key={i} className="flex items-center space-x-4 group">
+                <div className="h-6 w-6 rounded-full bg-blue-600/10 border border-blue-600/20 flex items-center justify-center">
+                  <CheckCircle2 className="h-4 w-4 text-blue-500" />
+                </div>
+                <span className="text-slate-300 font-medium tracking-wide text-sm">{text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer info */}
+        <div className="relative z-10">
+          <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.3em]">
+            Authorized Access Only // Port 443 Secured
           </p>
         </div>
+      </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 space-y-6">
-          <InputField
-            type="email"
-            placeholder="Enter your email"
-            value={loginForm.email}
-            onChange={(e) => updateLoginForm("email", e.target.value)}
-            icon={Mail}
-            error={errors.email}
-          />
-          <PasswordInput
-            value={loginForm.password}
-            onChange={(e) => updateLoginForm("password", e.target.value)}
-            error={errors.password}
-          />
-
-          <div className="flex items-center justify-between">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={loginForm.rememberMe}
-                onChange={(e) =>
-                  updateLoginForm("rememberMe", e.target.checked)
-                }
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer ease-in"
-              />
-              <span className="ml-2 text-sm text-gray-600">Remember me</span>
-            </label>
-            <button
-              type="button"
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer ease-in"
-            >
-              Forgot password?
-            </button>
+      {/* RIGHT SIDE: Clean, High-Contrast Form */}
+      <div className="flex-1 flex items-center justify-center p-8 md:p-20 bg-slate-50">
+        <div className="max-w-md w-full">
+          
+          {/* Mobile Only Logo */}
+          <div className="md:hidden flex items-center space-x-2 mb-12">
+             <Shield className="h-8 w-8 text-blue-600" />
+             <span className="text-2xl font-black text-slate-900 tracking-tighter">CyberShield</span>
           </div>
 
-          <button
-            onClick={handleLogin}
-            disabled={loading}
-            className="w-full flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ease-in"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="animate-spin h-5 w-5 mr-2" /> Signing In...
-              </>
-            ) : (
-              <>
-                Sign In <ArrowRight className="ml-2 h-4 w-4" />
-              </>
-            )}
-          </button>
-
-          <div className="mt-6 pt-6 border-t border-gray-200 text-center">
-            <p className="text-gray-600">
-              Don't have an account?{" "}
-              <a
-                href="/signup"
-                className="text-blue-600 hover:text-blue-800 font-medium"
-              >
-                Sign up for free
-              </a>
+          <div className="mb-10">
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-3">
+              Console Login
+            </h1>
+            <p className="text-slate-500 font-bold text-[11px] uppercase tracking-[0.2em] ml-0.5">
+              Enter your infrastructure credentials
             </p>
           </div>
-        </div>
 
-        {errors.form && (
-          <div className="text-red-500 text-sm flex items-center mb-2">
-            <AlertCircle className="h-4 w-4 mr-1" />
-            {errors.form}
-          </div>
-        )}
+          <form className="space-y-7" onSubmit={handleLogin}>
+            <div className="space-y-5">
+              
+              {/* Email Input */}
+              <div className="space-y-2">
+                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Enterprise Email
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <Mail className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="email"
+                    required
+                    value={loginForm.email}
+                    onChange={(e) => setLoginForm({...loginForm, email: e.target.value})}
+                    placeholder="e.acheampong@palm.edu"
+                    className="block w-full pl-11 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-slate-900 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 transition-all placeholder:text-slate-300 shadow-sm shadow-slate-200/50"
+                  />
+                </div>
+              </div>
 
-        {/* Security Badge */}
-        <div className="mt-6 text-center">
-          <div className="inline-flex items-center text-sm text-gray-500">
-            <Shield className="h-4 w-4 mr-2" />
-            Your data is protected with enterprise-grade security
+              {/* Password Input */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center ml-1">
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Security Key</label>
+                  <button type="button" className="text-[11px] text-blue-600 hover:text-blue-700 font-black uppercase tracking-wider">Forgot?</button>
+                </div>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <LockKeyhole className="h-4 w-4" />
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={loginForm.password}
+                    onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                    placeholder="••••••••"
+                    className="block w-full pl-11 pr-12 py-4 bg-white border border-slate-200 rounded-2xl text-slate-900 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 transition-all placeholder:text-slate-300 shadow-sm shadow-slate-200/50"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-900 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Remember Me Checkbox */}
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                type="checkbox"
+                checked={loginForm.rememberMe}
+                onChange={(e) => setLoginForm({...loginForm, rememberMe: e.target.checked})}
+                className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer transition-all"
+              />
+              <label htmlFor="remember-me" className="ml-2.5 block text-[11px] font-bold text-slate-500 uppercase tracking-wider cursor-pointer select-none">
+                Maintain Secure Session
+              </label>
+            </div>
+
+            {/* Error Message Display */}
+            {errors.form && (
+              <div className="flex items-center p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-xs font-bold animate-in fade-in duration-300">
+                <AlertCircle className="h-4 w-4 mr-3 shrink-0" />
+                {errors.form}
+              </div>
+            )}
+
+            {/* Primary Action Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-4.5 px-4 bg-slate-900 text-white text-sm font-black rounded-2xl hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-200 transition-all active:scale-[0.98] disabled:opacity-70 shadow-xl shadow-slate-900/10"
+            >
+              {loading ? (
+                <Loader2 className="animate-spin h-5 w-5" />
+              ) : (
+                <span className="flex items-center">
+                  Initialize Console Access <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </span>
+              )}
+            </button>
+          </form>
+
+          {/* Bottom Navigation */}
+          <div className="mt-12 text-center">
+            <p className="text-slate-400 text-xs font-medium tracking-tight">
+              New to CyberShield?{" "}
+              <a href="/signup" className="text-blue-600 hover:text-blue-700 font-black transition-colors underline underline-offset-4 decoration-2">
+                Deploy SME Node
+              </a>
+            </p>
           </div>
         </div>
       </div>
