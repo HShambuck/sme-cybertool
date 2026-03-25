@@ -39,7 +39,14 @@ const AppRouter = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/assessment-results" element={<AssessmentResults />} />
+        <Route
+  path="/assessment/results"
+  element={
+    <ProtectedRoute>
+      <AssessmentResults />
+    </ProtectedRoute>
+  }
+/>
         <Route
           path="/training"
           element={
