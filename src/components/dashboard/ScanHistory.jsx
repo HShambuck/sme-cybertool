@@ -26,6 +26,7 @@ import {
   Tag,
   ExternalLink,
 } from "lucide-react";
+import { securityAPI } from "../../services/api";
 
 // ════════════════════════════════════════════════════════════
 // HELPERS
@@ -268,14 +269,13 @@ const ScanHistory = () => {
       setLoading(true);
       setError(null);
       const [hRes, sRes] = await Promise.all([
-        fetch("/api/security/history?limit=20"),
-        fetch("/api/security/stats"),
+        securityAPI.getScanHistory(20),
+        securityAPI.getScanStats(),
       ]);
-      const hData = await hRes.json();
-      const sData = await sRes.json();
-      if (hData.success) setScans(hData.scans);
-      if (sData.success) setStats(sData.stats);
+      if (hRes.data?.success) setScans(hRes.data.scans);
+      if (sRes.data?.success) setStats(sRes.data.stats);
     } catch (err) {
+      console.error("Scan history fetch error:", err);
       setError("Failed to load scan history.");
     } finally {
       setLoading(false);

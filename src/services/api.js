@@ -107,7 +107,7 @@ API.interceptors.response.use(
 // Security API endpoints
 export const securityAPI = {
   analyzeWebsite: (url) => API.post('/security/analyze', { url }),
-  getScanHistory: (limit = 10) =>API.get(`/security/history?limit=${limit}`),
+  getScanHistory: (limit = 20) => API.get(`/security/history?limit=${limit}`),
   getScanStats: () => API.get('/security/stats')
 };
 
