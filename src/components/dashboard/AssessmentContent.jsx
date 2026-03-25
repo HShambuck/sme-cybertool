@@ -1,32 +1,25 @@
 // src/components/dashboard/AssessmentContent.jsx
 import React, { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import {
-  ShieldCheck,
   ChevronRight,
   ChevronLeft,
-  Lock,
-  Activity,
   Zap,
   CheckCircle2,
-  Layout,
   ListChecks,
-  ShieldAlert,
 } from "lucide-react";
 import { assessmentQuestions } from "./assessment/assessmentQuestions";
 import { createAssessment } from "../../services/assessment";
 
-const AssessmentContent = ({ setCurrentView }) => {
-  const navigate = useNavigate();
+const AssessmentContent = ({ setCurrentView, onAssessmentComplete }) => {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // Group questions by domain for the "Solid" Sidebar look
-  const domains = useMemo(() => {
-    return [...new Set(assessmentQuestions.map((q) => q.domain))];
-  }, []);
+  const domains = useMemo(
+    () => [...new Set(assessmentQuestions.map((q) => q.domain))],
+    [],
+  );
 
   const currentQuestion = assessmentQuestions[currentIdx];
   const progress = Math.round(
@@ -36,14 +29,13 @@ const AssessmentContent = ({ setCurrentView }) => {
   const handleAnswer = (value, impact) => {
     setAnswers({ ...answers, [currentQuestion.id]: { value, impact } });
     if (currentIdx < assessmentQuestions.length - 1) {
-      setTimeout(() => setCurrentIdx(currentIdx + 1), 300); // Smooth auto-advance
+      setTimeout(() => setCurrentIdx(currentIdx + 1), 300);
     }
   };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // Build payload from answers
       const questionsAnswered = assessmentQuestions
         .filter((q) => answers[q.id])
         .map((q) => ({
@@ -53,13 +45,12 @@ const AssessmentContent = ({ setCurrentView }) => {
           scoreImpact: answers[q.id].impact,
         }));
 
-      // Hit the backend
       const response = await createAssessment({ questionsAnswered });
 
-      // Navigate to results with the assessment data
-      navigate("/assessment/results", {
-        state: { assessment: response.assessment },
-      });
+      // ── KEY CHANGE: stay inside the dashboard ──
+      // Pass results up to Dashboard, then switch view
+      onAssessmentComplete(response.assessment);
+      setCurrentView("results");
     } catch (err) {
       console.error("❌ Assessment submission failed:", err);
       setError(err.message || "Failed to submit assessment. Please try again.");
@@ -69,7 +60,7 @@ const AssessmentContent = ({ setCurrentView }) => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* LEFT: DOMAIN PROGRESS SIDEBAR */}
+      {/* LEFT: Domain Progress Sidebar */}
       <div className="lg:col-span-1 space-y-4">
         <div className="bg-[#0F172A] border border-slate-800/50 rounded-[32px] p-8">
           <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-6 flex items-center">
@@ -125,10 +116,9 @@ const AssessmentContent = ({ setCurrentView }) => {
         </div>
       </div>
 
-      {/* RIGHT: THE TERMINAL INTERFACE */}
+      {/* RIGHT: Question Panel */}
       <div className="lg:col-span-3">
         <div className="bg-[#0F172A] border border-slate-800/50 rounded-[40px] p-12 relative min-h-[500px] flex flex-col justify-between overflow-hidden">
-          {/* Subtle Glow Effect */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
 
           {isSubmitting ? (
@@ -206,13 +196,14 @@ const AssessmentContent = ({ setCurrentView }) => {
                   })}
                 </div>
               </div>
+
               {error && (
                 <div className="mt-4 bg-red-500/10 border border-red-500/20 rounded-2xl p-4">
                   <p className="text-red-400 text-xs">{error}</p>
                 </div>
               )}
 
-              {/* FOOTER CONTROLS */}
+              {/* Footer Controls */}
               <div className="flex items-center justify-between mt-12 pt-8 border-t border-slate-800/50">
                 <button
                   disabled={currentIdx === 0}
