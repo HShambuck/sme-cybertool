@@ -8,8 +8,12 @@ import {
   Globe,
   Shield,
   Eye,
-  ChevronRight,
+  ChevronDown,
   Loader,
+  Lock,
+  Server,
+  CheckCircle,
+  AlertTriangle,
 } from "lucide-react";
 
 const ScanHistory = () => {
@@ -29,34 +33,38 @@ const ScanHistory = () => {
         fetch("/api/security/history?limit=20"),
         fetch("/api/security/stats"),
       ]);
-
       const historyData = await historyRes.json();
       const statsData = await statsRes.json();
-
-      if (historyData.success) {
-        setScans(historyData.scans);
-      }
-
-      if (statsData.success) {
-        setStats(statsData.stats);
-      }
-    } catch (error) {
-      console.error("Failed to fetch data:", error);
+      if (historyData.success) setScans(historyData.scans);
+      if (statsData.success) setStats(statsData.stats);
+    } catch (err) {
+      console.error("Failed to fetch data:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const getScoreColor = (score) => {
-    if (score >= 80) return "text-green-600";
-    if (score >= 60) return "text-yellow-600";
-    return "text-red-600";
-  };
-
-  const getScoreBg = (score) => {
-    if (score >= 80) return "bg-green-100";
-    if (score >= 60) return "bg-yellow-100";
-    return "bg-red-100";
+  const getScoreConfig = (score) => {
+    if (score >= 80)
+      return {
+        color: "text-emerald-400",
+        bar: "bg-emerald-500",
+        dot: "bg-emerald-500",
+        border: "hover:border-emerald-500/20",
+      };
+    if (score >= 60)
+      return {
+        color: "text-amber-400",
+        bar: "bg-amber-500",
+        dot: "bg-amber-500",
+        border: "hover:border-amber-500/20",
+      };
+    return {
+      color: "text-red-400",
+      bar: "bg-red-500",
+      dot: "bg-red-500",
+      border: "hover:border-red-500/20",
+    };
   };
 
   const formatDate = (date) => {
@@ -69,248 +77,283 @@ const ScanHistory = () => {
     });
   };
 
-  const getTrend = (currentScore, previousScore) => {
-    if (!previousScore) return null;
-    const diff = currentScore - previousScore;
-    if (diff > 0) return { direction: "up", value: diff };
-    if (diff < 0) return { direction: "down", value: Math.abs(diff) };
-    return { direction: "neutral", value: 0 };
+  const getTrend = (curr, prev) => {
+    if (!prev) return null;
+    const diff = curr - prev;
+    return {
+      direction: diff > 0 ? "up" : diff < 0 ? "down" : "neutral",
+      value: Math.abs(diff),
+    };
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6 flex items-center justify-center">
+      <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <Loader className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading scan history...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-800 border-t-blue-600 mx-auto mb-4" />
+          <p className="text-slate-500 font-mono text-xs uppercase tracking-widest">
+            Loading scan history...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-3 mb-2">
-            <History className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-800">Scan History</h1>
-          </div>
-          <p className="text-gray-600">
-            Review your past website security analyses
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Header */}
+      <div>
+        <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1">
+          Audit Trail
+        </p>
+        <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-3">
+          <History className="h-6 w-6 text-blue-500" />
+          Scan History
+        </h1>
+      </div>
+
+      {/* Stats Cards */}
+      {stats && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            {
+              label: "Total Scans",
+              value: stats.totalScans,
+              icon: BarChart3,
+              iconColor: "text-blue-400",
+              iconBg: "bg-blue-500/10",
+            },
+            {
+              label: "Average Score",
+              value: stats.averageScore,
+              icon: TrendingUp,
+              iconColor: "text-emerald-400",
+              iconBg: "bg-emerald-500/10",
+            },
+            {
+              label: "Sites Analyzed",
+              value: stats.uniqueDomains,
+              icon: Globe,
+              iconColor: "text-purple-400",
+              iconBg: "bg-purple-500/10",
+            },
+          ].map(({ label, value, icon: Icon, iconColor, iconBg }) => (
+            <div
+              key={label}
+              className="bg-[#0F172A] border border-slate-800/50 rounded-[32px] p-8 relative overflow-hidden group"
+            >
+              <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Icon className={`h-24 w-24 ${iconColor}`} />
+              </div>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2">
+                {label}
+              </p>
+              <h2 className="text-6xl font-black text-white tracking-tighter">
+                {value}
+              </h2>
+              <div
+                className={`mt-4 w-8 h-8 rounded-xl ${iconBg} flex items-center justify-center`}
+              >
+                <Icon className={`h-4 w-4 ${iconColor}`} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Scan List */}
+      <div className="bg-[#0F172A] border border-slate-800/50 rounded-[40px] overflow-hidden">
+        <div className="px-10 py-8 border-b border-slate-800/50">
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">
+            Recent Activity
           </p>
+          <h2 className="text-sm font-black text-white mt-1">Security Scans</h2>
         </div>
 
-        {/* Statistics Cards */}
-        {stats && (
-          <div className="grid md:grid-cols-3 gap-6 mb-6">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex items-center justify-between mb-2">
-                <div className="bg-blue-100 p-3 rounded-lg">
-                  <BarChart3 className="w-6 h-6 text-blue-600" />
-                </div>
-                <span className="text-3xl font-bold text-gray-800">
-                  {stats.totalScans}
-                </span>
-              </div>
-              <p className="text-gray-600 font-medium">Total Scans</p>
+        {scans.length === 0 ? (
+          <div className="p-16 text-center">
+            <div className="w-16 h-16 rounded-[20px] bg-slate-900/50 border border-slate-800 flex items-center justify-center mx-auto mb-6">
+              <History className="h-8 w-8 text-slate-700" />
             </div>
-
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex items-center justify-between mb-2">
-                <div className="bg-green-100 p-3 rounded-lg">
-                  <TrendingUp className="w-6 h-6 text-green-600" />
-                </div>
-                <span className="text-3xl font-bold text-gray-800">
-                  {stats.averageScore}
-                </span>
-              </div>
-              <p className="text-gray-600 font-medium">Average Score</p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex items-center justify-between mb-2">
-                <div className="bg-purple-100 p-3 rounded-lg">
-                  <Globe className="w-6 h-6 text-purple-600" />
-                </div>
-                <span className="text-3xl font-bold text-gray-800">
-                  {stats.uniqueDomains}
-                </span>
-              </div>
-              <p className="text-gray-600 font-medium">Websites Analyzed</p>
-            </div>
+            <h3 className="text-sm font-black text-white uppercase tracking-widest mb-2">
+              No Scans Yet
+            </h3>
+            <p className="text-xs text-slate-600">
+              Run a security scan to populate your audit trail
+            </p>
           </div>
-        )}
+        ) : (
+          <div className="divide-y divide-slate-800/50">
+            {scans.map((scan, index) => {
+              const prevScan = scans[index + 1];
+              const trend = prevScan
+                ? getTrend(scan.score, prevScan.score)
+                : null;
+              const cfg = getScoreConfig(scan.score);
+              const isExpanded = selectedScan?._id === scan._id;
 
-        {/* Scan History List */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-800">Recent Scans</h2>
-          </div>
-
-          {scans.length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="bg-gray-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <History className="w-10 h-10 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                No Scans Yet
-              </h3>
-              <p className="text-gray-600">
-                Start analyzing websites to see your history here
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200">
-              {scans.map((scan, index) => {
-                const prevScan = scans[index + 1];
-                const trend = prevScan
-                  ? getTrend(scan.score, prevScan.score)
-                  : null;
-
-                return (
-                  <div
-                    key={scan._id}
-                    className="p-6 hover:bg-gray-50 transition-colors cursor-pointer"
-                    onClick={() =>
-                      setSelectedScan(
-                        selectedScan?._id === scan._id ? null : scan
-                      )
-                    }
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-4 flex-1">
+              return (
+                <div
+                  key={scan._id}
+                  className={`px-10 py-7 cursor-pointer transition-all ${cfg.border} hover:bg-slate-900/30`}
+                  onClick={() => setSelectedScan(isExpanded ? null : scan)}
+                >
+                  {/* Row */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-5 flex-1 min-w-0">
+                      {/* Score Circle */}
+                      <div className="relative flex-shrink-0">
                         <div
-                          className={`${getScoreBg(scan.score)} p-3 rounded-lg`}
+                          className={`w-12 h-12 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-center`}
                         >
-                          <Shield
-                            className={`w-6 h-6 ${getScoreColor(scan.score)}`}
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-lg font-semibold text-gray-800">
-                              {scan.domain}
-                            </h3>
-                            {trend && (
-                              <span
-                                className={`flex items-center gap-1 text-sm ${
-                                  trend.direction === "up"
-                                    ? "text-green-600"
-                                    : trend.direction === "down"
-                                    ? "text-red-600"
-                                    : "text-gray-600"
-                                }`}
-                              >
-                                {trend.direction === "up" && (
-                                  <TrendingUp className="w-4 h-4" />
-                                )}
-                                {trend.direction === "down" && (
-                                  <TrendingDown className="w-4 h-4" />
-                                )}
-                                {trend.value > 0 && `${trend.value}pts`}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-4 h-4" />
-                              {formatDate(scan.scanDate)}
-                            </span>
-                            <span>SSL: {scan.sslGrade}</span>
-                            <span>{scan.securityHeaders.length} headers</span>
-                          </div>
+                          <Shield className={`h-5 w-5 ${cfg.color}`} />
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <div
-                            className={`text-3xl font-bold ${getScoreColor(
-                              scan.score
-                            )}`}
-                          >
-                            {scan.score}
-                          </div>
-                          <div className="text-sm text-gray-500">/100</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-1">
+                          <h3 className="text-sm font-black text-white truncate">
+                            {scan.domain}
+                          </h3>
+                          {trend && trend.value > 0 && (
+                            <span
+                              className={`flex items-center gap-1 text-[9px] font-black uppercase tracking-widest ${trend.direction === "up" ? "text-emerald-400" : "text-red-400"}`}
+                            >
+                              {trend.direction === "up" ? (
+                                <TrendingUp className="h-3 w-3" />
+                              ) : (
+                                <TrendingDown className="h-3 w-3" />
+                              )}
+                              {trend.value}pts
+                            </span>
+                          )}
                         </div>
-                        <ChevronRight
-                          className={`w-5 h-5 text-gray-400 transition-transform ${
-                            selectedScan?._id === scan._id ? "rotate-90" : ""
-                          }`}
-                        />
+                        <div className="flex flex-wrap items-center gap-4 text-[10px] text-slate-600 font-mono">
+                          <span className="flex items-center gap-1.5">
+                            <Calendar className="h-3 w-3" />
+                            {formatDate(scan.scanDate)}
+                          </span>
+                          <span>SSL: {scan.sslGrade}</span>
+                          <span>{scan.securityHeaders.length} headers</span>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Expanded Details */}
-                    {selectedScan?._id === scan._id && (
-                      <div className="mt-4 pt-4 border-t border-gray-200 space-y-4">
-                        {/* Security Headers */}
+                    <div className="flex items-center gap-5 flex-shrink-0 ml-4">
+                      <div className="text-right">
+                        <div
+                          className={`text-3xl font-black tracking-tighter ${cfg.color}`}
+                        >
+                          {scan.score}
+                        </div>
+                        <div className="text-[9px] text-slate-700 font-mono">
+                          /100
+                        </div>
+                      </div>
+                      <ChevronDown
+                        className={`h-4 w-4 text-slate-600 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Score bar */}
+                  <div
+                    className="mt-3 ml-17 h-1 bg-slate-900 rounded-full overflow-hidden"
+                    style={{ marginLeft: "68px" }}
+                  >
+                    <div
+                      className={`h-1 rounded-full ${cfg.bar}`}
+                      style={{ width: `${scan.score}%` }}
+                    />
+                  </div>
+
+                  {/* Expanded Details */}
+                  {isExpanded && (
+                    <div
+                      className="mt-6 pt-6 border-t border-slate-800/50 space-y-5"
+                      style={{ marginLeft: "68px" }}
+                    >
+                      {/* Security Headers */}
+                      <div>
+                        <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3">
+                          Security Headers
+                        </p>
+                        <div className="grid md:grid-cols-2 gap-2">
+                          {scan.securityHeaders.map((header, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center gap-2 text-xs text-slate-400 bg-slate-900/50 border border-slate-800 p-3 rounded-xl font-mono"
+                            >
+                              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full flex-shrink-0" />
+                              {header}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Issues */}
+                      {scan.issues?.length > 0 && (
                         <div>
-                          <h4 className="font-semibold text-gray-800 mb-2">
-                            Security Headers
-                          </h4>
-                          <div className="grid md:grid-cols-2 gap-2">
-                            {scan.securityHeaders.map((header, idx) => (
+                          <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3">
+                            Issues Found
+                          </p>
+                          <div className="space-y-2">
+                            {scan.issues.map((issue, idx) => (
                               <div
                                 key={idx}
-                                className="flex items-center gap-2 text-sm text-gray-700 bg-green-50 p-2 rounded"
+                                className="flex items-center gap-2 text-xs text-slate-400 bg-amber-500/5 border border-amber-500/10 p-3 rounded-xl"
                               >
-                                <div className="w-2 h-2 bg-green-500 rounded-full" />
-                                {header}
+                                <div className="w-1.5 h-1.5 bg-amber-500 rounded-full flex-shrink-0" />
+                                {issue}
                               </div>
                             ))}
                           </div>
                         </div>
+                      )}
 
-                        {/* Issues */}
-                        {scan.issues && scan.issues.length > 0 && (
-                          <div>
-                            <h4 className="font-semibold text-gray-800 mb-2">
-                              Issues Found
-                            </h4>
-                            <div className="space-y-2">
-                              {scan.issues.map((issue, idx) => (
-                                <div
-                                  key={idx}
-                                  className="flex items-center gap-2 text-sm text-gray-700 bg-orange-50 p-2 rounded"
-                                >
-                                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
-                                  {issue}
-                                </div>
-                              ))}
+                      {/* Reputation + Breach */}
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {[
+                          {
+                            label: "Reputation",
+                            value: scan.reputation,
+                            icon: Server,
+                            positive: scan.reputation === "Clean",
+                          },
+                          {
+                            label: "Breach Status",
+                            value: scan.breachStatus,
+                            icon: Eye,
+                            positive: scan.breachStatus === "No leaks found",
+                          },
+                        ].map(({ label, value, icon: Icon, positive }) => (
+                          <div
+                            key={label}
+                            className={`p-4 rounded-2xl border ${positive ? "bg-emerald-500/5 border-emerald-500/10" : "bg-red-500/5 border-red-500/10"}`}
+                          >
+                            <p className="text-[9px] font-black uppercase tracking-widest mb-1 text-slate-600">
+                              {label}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              {positive ? (
+                                <CheckCircle className="h-3.5 w-3.5 text-emerald-400 flex-shrink-0" />
+                              ) : (
+                                <AlertTriangle className="h-3.5 w-3.5 text-red-400 flex-shrink-0" />
+                              )}
+                              <span className="text-xs font-bold text-slate-300">
+                                {value}
+                              </span>
                             </div>
                           </div>
-                        )}
-
-                        {/* Additional Info */}
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div className="bg-blue-50 p-3 rounded-lg">
-                            <div className="text-sm text-gray-600 mb-1">
-                              Reputation
-                            </div>
-                            <div className="font-semibold text-gray-800">
-                              {scan.reputation}
-                            </div>
-                          </div>
-                          <div className="bg-purple-50 p-3 rounded-lg">
-                            <div className="text-sm text-gray-600 mb-1">
-                              Breach Status
-                            </div>
-                            <div className="font-semibold text-gray-800">
-                              {scan.breachStatus}
-                            </div>
-                          </div>
-                        </div>
+                        ))}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
