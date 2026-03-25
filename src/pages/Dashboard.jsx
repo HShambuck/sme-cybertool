@@ -17,6 +17,7 @@ import OverviewContent from "../components/dashboard/OverviewContent";
 import AssessmentContent from "../components/dashboard/AssessmentContent";
 import AssessmentResults from "../components/dashboard/AssessmentResults"; // ← now a component, not a page
 import TrainingModules from "../pages/TrainingModules";
+import TrainingModuleDetail from "../components/dashboard/TrainingModuleDetail";
 import ThreatUpdates from "../components/dashboard/ThreatUpdates";
 import WebsiteSecurityAnalysis from "../components/dashboard/WebsiteSecurityAnalysis";
 import ScanHistory from "../components/dashboard/ScanHistory";
@@ -52,6 +53,7 @@ const Dashboard = () => {
 
   // ── NEW: holds assessment results so they render inside the dashboard ──
   const [assessmentData, setAssessmentData] = useState(null);
+  const [selectedModuleId, setSelectedModuleId] = useState(null);
 
   const isTokenValid = () => {
     const token = localStorage.getItem("token");
@@ -173,7 +175,23 @@ const Dashboard = () => {
         );
 
       case "training":
-        return <TrainingModules />;
+        return (
+          <TrainingModules
+            setCurrentView={setCurrentView}
+            onSelectModule={(id) => {
+              setSelectedModuleId(id);
+              setCurrentView("moduleDetail");
+            }}
+          />
+        );
+
+      case "moduleDetail":
+        return (
+          <TrainingModuleDetail
+            moduleId={selectedModuleId}
+            setCurrentView={setCurrentView}
+          />
+        );
 
       case "threats":
         return (
@@ -217,6 +235,7 @@ const Dashboard = () => {
       assessment: "Risk Assessment",
       results: "Assessment Results",
       training: "Training Modules",
+      moduleDetail: "Training Module",
       threats: "Threat Updates",
       security: "Web Security",
       history: "Scan History",

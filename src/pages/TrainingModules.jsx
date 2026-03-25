@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   BookOpen, Clock, Award, Search, Filter, ChevronRight,
   Play, CheckCircle, TrendingUp, Star, Users, Target, Zap, 
@@ -7,8 +6,8 @@ import {
 } from "lucide-react";
 import { getAllModules, getRecommendedModules } from "../services/training";
 
-const TrainingModules = () => {
-  const navigate = useNavigate();
+const TrainingModules = ({ setCurrentView, onSelectModule }) => {
+
   const [modules, setModules] = useState([]);
   const [recommendedModules, setRecommendedModules] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -72,7 +71,7 @@ const TrainingModules = () => {
 
     return (
       <div
-        onClick={() => navigate(`/training/${module._id}`)}
+        onClick={() => onSelectModule(module._id)}
         className={`group relative bg-[#0F172A] rounded-[32px] border transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] ${
           isRecommended ? "border-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.1)]" : "border-slate-800/50 shadow-xl"
         } hover:border-blue-500/50`}
