@@ -68,6 +68,18 @@ const PLAIN_ENGLISH = {
   REP_002: "Automated analysis detected suspicious behaviour — unusual external requests, redirects, or resource loading patterns.",
 };
 
+const decodeHtml = (str) => {
+  if (!str || typeof str !== "string") return str || "";
+  return str
+    .replace(/&amp;/g,  "&")
+    .replace(/&lt;/g,   "<")
+    .replace(/&gt;/g,   ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g,  "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)));
+};
+
 // ─── PDF layout constants ─────────────────────────────────────────────────────
 const PAGE_W   = 210; // A4 mm
 const PAGE_H   = 297;
@@ -423,7 +435,7 @@ const renderFindings = (doc, results) => {
     doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...COLOURS.white);
-    const titleLines = doc.splitTextToSize(finding.title, COL_W - 20);
+    const titleLines = doc.splitTextToSize(decodeHtml(finding.title), COL_W - 20);
     doc.text(titleLines, MARGIN + 8, y + 7);
     const titleH = titleLines.length * 5;
 
@@ -445,7 +457,7 @@ const renderFindings = (doc, results) => {
     doc.text("Fix:", MARGIN + 8, y + titleH + expH + 16);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...COLOURS.muted);
-    const fixLines = doc.splitTextToSize(finding.recommendation || "", COL_W - 20);
+    const fixLines = doc.splitTextToSize(decodeHtml(finding.recommendation || ""), COL_W - 20)
     doc.text(fixLines, MARGIN + 16, y + titleH + expH + 16);
 
     // OWASP tag
@@ -472,7 +484,6 @@ const renderRecommendations = (doc, results) => {
   newPage(doc);
   let y = MARGIN + 8;
 
-  // Section header
   doc.setFontSize(7);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...COLOURS.blue);
@@ -498,55 +509,57 @@ const renderRecommendations = (doc, results) => {
   y += 10;
 
   recs.forEach((rec, idx) => {
+    // Decode all fields before rendering
+    const title       = decodeHtml(rec.title);
+    const description = decodeHtml(rec.description);
+    const action      = decodeHtml(rec.action);
+    const impact      = decodeHtml(rec.impact);
+    const category    = decodeHtml(rec.category);
+    const priority    = decodeHtml(rec.priority);
+
     y = checkPageBreak(doc, y, 50);
 
-    const col = severityColour(rec.priority);
+    const col = severityColour(priority);
 
-    // Card
     roundRect(doc, MARGIN, y - 4, COL_W, 50, 3, COLOURS.card);
     doc.setFillColor(...col);
     doc.rect(MARGIN, y - 4, 3, 50, "F");
 
-    // Number + priority + category
     doc.setFontSize(7);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...col);
     doc.text(
-      `${String(idx + 1).padStart(2, "0")}  ${(rec.priority || "").toUpperCase()}  ·  ${(rec.category || "").toUpperCase()}`,
+      `${String(idx + 1).padStart(2, "0")}  ${priority.toUpperCase()}  ·  ${category.toUpperCase()}`,
       MARGIN + 8, y + 1
     );
 
-    // Title
     doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...COLOURS.white);
-    const titleLines = doc.splitTextToSize(rec.title || "", COL_W - 16);
+    const titleLines = doc.splitTextToSize(title, COL_W - 16);
     doc.text(titleLines, MARGIN + 8, y + 7);
     const titleH = titleLines.length * 5;
 
-    // Description
     doc.setFontSize(7.5);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...COLOURS.muted);
-    const descLines = doc.splitTextToSize(rec.description || "", COL_W - 16);
+    const descLines = doc.splitTextToSize(description, COL_W - 16);
     doc.text(descLines, MARGIN + 8, y + titleH + 9);
     const descH = descLines.length * 4.5;
 
-    // Action
     doc.setFontSize(7);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...COLOURS.blue);
     doc.text("Action:", MARGIN + 8, y + titleH + descH + 12);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...COLOURS.muted);
-    const actionLines = doc.splitTextToSize(rec.action || "", COL_W - 24);
+    const actionLines = doc.splitTextToSize(action, COL_W - 24);
     doc.text(actionLines, MARGIN + 22, y + titleH + descH + 12);
 
-    // Impact
     doc.setFontSize(6.5);
     doc.setFont("helvetica", "italic");
     doc.setTextColor(...COLOURS.muted);
-    const impactLines = doc.splitTextToSize(`Impact: ${rec.impact || ""}`, COL_W - 16);
+    const impactLines = doc.splitTextToSize(`Impact: ${impact}`, COL_W - 16);
     doc.text(impactLines, MARGIN + 8, y + 44);
 
     y += 56;
