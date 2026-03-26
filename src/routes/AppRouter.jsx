@@ -6,16 +6,10 @@ import {
   Navigate,
 } from "react-router-dom";
 
-// Pages
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import Dashboard from "../pages/Dashboard";
-import AssessmentContent from "../components/dashboard/AssessmentContent";
-import AssessmentResults from "../pages/AssessmentResults";
-import TrainingModules from "../pages/TrainingModules";
-import TrainingModuleDetail from "../pages/TrainingModuleDetail";
 
-// Protected Route helper
 const ProtectedRoute = ({ children }) => {
   const token =
     localStorage.getItem("token") || sessionStorage.getItem("token");
@@ -30,7 +24,6 @@ const AppRouter = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* Protected Routes */}
         <Route
           path="/dashboard"
           element={
@@ -39,33 +32,9 @@ const AppRouter = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-  path="/assessment/results"
-  element={
-    <ProtectedRoute>
-      <AssessmentResults />
-    </ProtectedRoute>
-  }
-/>
-        <Route
-          path="/training"
-          element={
-            <ProtectedRoute>
-              <TrainingModules />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/training/:id"
-          element={
-            <ProtectedRoute>
-              <TrainingModuleDetail />
-            </ProtectedRoute>
-          }
-        />
 
-        {/* Catch-all */}
-        <Route path="*" element={<Navigate to="/login" />} />
+        {/* All other views render inside Dashboard via setCurrentView */}
+        <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </Router>
   );

@@ -6,7 +6,7 @@ import {
 import {
   getModuleById, startModule, updateProgress,
   completeModule, submitQuiz, rateModule,
-} from "../services/training";
+} from "../../services/training";
 
 const TrainingModuleDetail = ({ moduleId, setCurrentView }) => {
   const [module, setModule] = useState(null);

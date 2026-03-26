@@ -4,7 +4,7 @@ import {
   Play, CheckCircle, TrendingUp, Star, Users, Target, Zap, 
   ShieldCheck, Activity, GraduationCap
 } from "lucide-react";
-import { getAllModules, getRecommendedModules } from "../services/training";
+import { getAllModules, getRecommendedModules } from "../../services/training";
 
 const TrainingModules = ({ setCurrentView, onSelectModule }) => {
 
