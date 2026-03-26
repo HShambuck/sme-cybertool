@@ -17,7 +17,7 @@ import OverviewContent from "../components/dashboard/OverviewContent";
 import AssessmentContent from "../components/dashboard/AssessmentContent";
 import AssessmentResults from "../components/dashboard/AssessmentResults"; // ← now a component, not a page
 import TrainingModules from "../pages/TrainingModules";
-import TrainingModuleDetail from "../components/dashboard/TrainingModuleDetail";
+import TrainingModuleDetail from "../pages/TrainingModuleDetail";
 import ThreatUpdates from "../components/dashboard/ThreatUpdates";
 import WebsiteSecurityAnalysis from "../components/dashboard/WebsiteSecurityAnalysis";
 import ScanHistory from "../components/dashboard/ScanHistory";
