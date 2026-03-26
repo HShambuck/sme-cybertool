@@ -19,6 +19,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { securityAPI } from "../../services/api";
+import { generatePDFReport } from "../../utils/generatePDFReport";
 
 const WebsiteSecurityAnalysis = () => {
   const [url, setUrl] = useState("https://");
@@ -192,14 +193,8 @@ const WebsiteSecurityAnalysis = () => {
   };
 
   const downloadReport = () => {
-    const blob = new Blob([JSON.stringify(results, null, 2)], {
-      type: "application/json",
-    });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `security-report-${results.domain}-${new Date().toISOString()}.json`;
-    a.click();
-  };
+  generatePDFReport(results);
+};
 
   const scoreConfig = results ? getScoreConfig(results.score) : null;
 
