@@ -102,7 +102,7 @@ const TrainingModules = ({ setCurrentView, onSelectModule }) => {
         {isRecommended && (
           <div className="absolute -top-3 left-8 z-20">
             <div className="bg-amber-500 text-white text-[9px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-full flex items-center shadow-lg">
-              <Zap className="h-3 w-3 mr-1.5 fill-white" /> From Your Assessment
+              <Zap className="h-3 w-3 mr-1.5 fill-white" /> Recommended
             </div>
           </div>
         )}
