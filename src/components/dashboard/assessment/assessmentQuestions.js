@@ -308,7 +308,7 @@ export const assessmentQuestions = [
     question: "Do you have cybersecurity insurance?",
     type: "radio",
     options: [
-      { label: "Yes, with cyber coverage", value: "yes", scoreImpact: 3 },
+      { label: "Yes, with cyber coverage", value: "yes", scoreImpact: 2 },
       { label: "General insurance only", value: "partial", scoreImpact: 1 },
       { label: "No insurance", value: "no", scoreImpact: 0 },
     ],
@@ -405,7 +405,7 @@ export const assessmentQuestions = [
         scoreImpact: 3,
       },
       { label: "Yes, but no controls", value: "partial", scoreImpact: 1 },
-      { label: "No BYOD allowed", value: "no", scoreImpact: 0 },
+      { label: "No BYOD allowed", value: "no", scoreImpact: 3 },
     ],
   },
 
@@ -428,7 +428,7 @@ export const assessmentQuestions = [
     question: "Do you comply with relevant privacy laws (GDPR, CCPA, local)?",
     type: "radio",
     options: [
-      { label: "Yes, compliant with audits", value: "yes", scoreImpact: 5 },
+      { label: "Yes, compliant with audits", value: "yes", scoreImpact: 4 },
       { label: "Somewhat compliant", value: "partial", scoreImpact: 2 },
       { label: "Not compliant / unaware", value: "no", scoreImpact: 0 },
     ],
@@ -445,7 +445,7 @@ export const assessmentQuestions = [
       {
         label: "Yes, with due diligence process",
         value: "yes",
-        scoreImpact: 5,
+        scoreImpact: 4,
       },
       { label: "Some checks performed", value: "partial", scoreImpact: 2 },
       { label: "No vendor assessment", value: "no", scoreImpact: 0 },
